@@ -6,4 +6,5 @@ class AppConstants {
   static const favoriteMealsKey = 'favorite_meals';
   static const searchDebounce = Duration(milliseconds: 300);
   static const searchMaxLength = 40;
+  static const categoriesCacheTtl = Duration(minutes: 5);
 }

@@ -52,13 +52,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _bootstrap() async {
-    final api = ref.read(mealApiProvider);
+    final mealsRepo = ref.read(mealRepositoryProvider);
     try {
-      final categories = await api.categories();
+      final categories = await mealsRepo.categories();
       final firstCategory = categories.isNotEmpty ? categories.first : null;
       final meals = firstCategory == null
-          ? await api.search('chicken')
-          : await api.byCategory(firstCategory);
+          ? await mealsRepo.search('chicken')
+          : await mealsRepo.byCategory(firstCategory);
       if (!mounted) {
         return;
       }
@@ -88,7 +88,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       _error = null;
     });
     try {
-      final meals = await ref.read(mealApiProvider).byCategory(category);
+      final meals = await ref.read(mealRepositoryProvider).byCategory(category);
       if (!mounted) {
         return;
       }
@@ -123,7 +123,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       _error = null;
     });
     try {
-      final meals = await ref.read(mealApiProvider).search(keyword);
+      final meals = await ref.read(mealRepositoryProvider).search(keyword);
       if (!mounted) {
         return;
       }
@@ -144,7 +144,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Future<void> _openRandom() async {
     try {
-      final meal = await ref.read(mealApiProvider).random();
+      final meal = await ref.read(mealRepositoryProvider).random();
       if (!mounted || meal == null) {
         return;
       }

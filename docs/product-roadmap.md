@@ -143,23 +143,22 @@ Mỗi **Phase** = 1–2 tuần học (tuỳ tốc độ). Trong mỗi phase, m�
 
 ## Phase 3 — Data layer & Repository (tuần 3)
 
-### F3.1 — Repository pattern cho Meals
+### F3.1 — Repository pattern cho Meals — **đã xong**
 
 ```
-UI → MealController/Provider → MealRepository → MealApi (Dio)
-                              → MealLocalCache (optional)
+UI → mealRepositoryProvider → MealRepository → MealApi (Dio)
 ```
 
 | Lớp | Việc làm | Map FE |
 |---|---|---|
-| UI | Không đổi (provider gọi repo) | Hook gọi service |
-| Data | `MealRepository`: search, byCategory, lookup, random | API service layer |
-| Arch | Interface `IMealRepository` + impl; inject vào provider | Repository interface |
-| Lint | `one_member_abstracts` — dùng typedef hoặc class | — |
-| Test | Mock repository trong widget test | MSW + mock service |
-| Debug | Log request/response ở Dio interceptor | Axios interceptors |
-| Perf | Optional in-memory cache 5 phút cho categories | SWR staleTime |
-| Security | HTTPS only (TheMealDB đã HTTPS); validate JSON shape | Zod parse response |
+| UI | Home/Detail dùng repo provider | Hook gọi service |
+| Data | `MealRepository` + `MealRepositoryImpl` | API service layer |
+| Arch | Abstract repo + impl; inject Riverpod | Repository interface |
+| Lint | Analyze sạch | — |
+| Test | Fake `MealApi` + cache TTL tests | MSW + mock service |
+| Debug | `debugPrint` theo method ở repository | Axios interceptors |
+| Perf | In-memory cache 5 phút cho categories | SWR staleTime |
+| Security | HTTPS TheMealDB; UI không đụng Dio | Zod parse response |
 
 ---
 

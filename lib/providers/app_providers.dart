@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../repositories/meal_repository.dart';
 import '../router/app_router.dart';
 import '../services/auth_store.dart';
 import '../services/favorites_store.dart';
@@ -9,6 +10,11 @@ import '../services/meal_api.dart';
 import '../services/theme_store.dart';
 
 final mealApiProvider = Provider<MealApi>((ref) => MealApi());
+
+/// UI nên đọc provider này, không gọi [mealApiProvider] trực tiếp.
+final mealRepositoryProvider = Provider<MealRepository>((ref) {
+  return MealRepositoryImpl(ref.watch(mealApiProvider));
+});
 
 final authStoreProvider = ChangeNotifierProvider<AuthStore>((ref) {
   throw StateError('Override authStoreProvider in main()');

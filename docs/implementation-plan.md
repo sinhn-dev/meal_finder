@@ -19,7 +19,7 @@
 | Lời chào trên Home + tìm kiếm có debounce | Đã xong (F1.3) |
 | Điều hướng `go_router` | Đã xong (F2.1) |
 | Riverpod | Đã xong (F2.2) |
-| Tầng repository cho món ăn | Chưa làm (F3.1) |
+| Tầng repository cho món ăn | Đã xong (F3.1) |
 
 ---
 
@@ -166,15 +166,35 @@ Mỗi tính năng phải đi đủ 8 bước, giống cách làm FE:
 - `test/app_providers_test.dart`
 - `test/helpers/pump_app.dart`
 
-Home vẫn giữ local fetch state (`_bootstrap` / `_search`); gọi API qua `ref.read(mealApiProvider)`. AsyncNotifier cho Home là F3.1.
+Home vẫn giữ local fetch state (`_bootstrap` / `_search`); gọi data qua `ref.read(mealRepositoryProvider)`.
 
 ---
 
 ## Giai đoạn 3 — Tầng dữ liệu
 
-- **F3.1** `MealRepository`: UI → provider → repository → Dio  
-  (tách gọi API khỏi màn hình, giống service layer FE)
-- **F3.2** Danh sách yêu thích theo từng `userId` (user A không thấy favorite của user B)
+### F3.1 MealRepository — **đã xong**
+
+| Lớp | Việc đã làm | Trạng thái |
+|---|---|---|
+| UI | Home / Detail gọi `mealRepositoryProvider` (không đổi UX) | Xong |
+| Data | `MealRepository` + `MealRepositoryImpl` → `MealApi` | Xong |
+| Kiến trúc | UI → provider → repository → Dio; `mealApiProvider` chỉ cho DI thấp | Xong |
+| Lint | Analyze sạch | Xong |
+| Test | `test/meal_repository_test.dart` (fake API + cache) | Xong |
+| Debug | `debugPrint` theo method ở repository | Xong |
+| Hiệu năng | Cache categories TTL 5 phút | Xong |
+| Bảo mật | Vẫn HTTPS TheMealDB; UI không đụng Dio | Xong |
+
+**Xong khi:** màn hình không import/`read` `MealApi` trực tiếp.
+
+**File liên quan**
+
+- `lib/repositories/meal_repository.dart`
+- `lib/providers/app_providers.dart` (`mealRepositoryProvider`)
+- `lib/screens/home_screen.dart`, `lib/screens/meal_detail_screen.dart`
+- `test/meal_repository_test.dart`
+
+- **F3.2** Favorites theo `userId` — **làm tiếp**
 - **F3.3** Lịch sử tìm kiếm (tối đa 10 từ khóa, lưu local)
 
 ---
@@ -241,4 +261,5 @@ Home vẫn giữ local fetch state (`_bootstrap` / `_search`); gọi API qua `re
 3. F1.3 Lời chào + debounce tìm kiếm — đã xong
 4. F2.1 go_router — đã xong
 5. F2.2 Riverpod — đã xong
-6. F3.1 MealRepository — **làm tiếp**
+6. F3.1 MealRepository — đã xong
+7. F3.2 Favorites theo userId — **làm tiếp**
