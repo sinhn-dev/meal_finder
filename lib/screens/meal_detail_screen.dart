@@ -26,7 +26,7 @@ class _MealDetailScreenState extends ConsumerState<MealDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _future = ref.read(mealApiProvider).lookup(widget.mealId);
+    _future = ref.read(mealRepositoryProvider).lookup(widget.mealId);
   }
 
   @override
@@ -65,7 +65,9 @@ class _MealDetailScreenState extends ConsumerState<MealDetailScreen> {
               text: snapshot.error.toString(),
               onRetry: () {
                 setState(() {
-                  _future = ref.read(mealApiProvider).lookup(widget.mealId);
+                  _future = ref
+                      .read(mealRepositoryProvider)
+                      .lookup(widget.mealId);
                 });
               },
             );

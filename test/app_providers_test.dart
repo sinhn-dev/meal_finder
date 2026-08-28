@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:meal_finder/providers/app_providers.dart';
+import 'package:meal_finder/repositories/meal_repository.dart';
 import 'package:meal_finder/services/auth_store.dart';
 import 'package:meal_finder/services/meal_api.dart';
 
@@ -18,7 +19,7 @@ void main() {
   });
 
   test(
-    'mealApiProvider and goRouterProvider can be read with auth override',
+    'meal providers and goRouterProvider can be read with auth override',
     () async {
       SharedPreferences.setMockInitialValues({});
       final auth = await AuthStore.create();
@@ -28,6 +29,7 @@ void main() {
       addTearDown(container.dispose);
 
       expect(container.read(mealApiProvider), isA<MealApi>());
+      expect(container.read(mealRepositoryProvider), isA<MealRepository>());
       expect(container.read(goRouterProvider), isA<GoRouter>());
       expect(
         identical(
