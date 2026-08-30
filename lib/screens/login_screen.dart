@@ -52,6 +52,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       await ref
           .read(authStoreProvider)
           .login(userName: userName, password: password);
+      final user = ref.read(authStoreProvider).currentUser;
+      if (user != null) {
+        await ref.read(favoritesStoreProvider).switchUser(user.id);
+      }
     } on AuthException catch (error) {
       if (!mounted) {
         return;

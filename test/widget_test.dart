@@ -10,7 +10,7 @@ import 'helpers/pump_app.dart';
 void main() {
   testWidgets('shows empty favorites state', (tester) async {
     SharedPreferences.setMockInitialValues({});
-    final favorites = await FavoritesStore.create();
+    final favorites = await FavoritesStore.create(userId: 'mock-test');
 
     await tester.pumpWidget(
       wrapWithProviders(

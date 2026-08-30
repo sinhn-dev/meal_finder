@@ -8,8 +8,8 @@ import 'services/theme_store.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final favorites = await FavoritesStore.create();
   final auth = await AuthStore.create();
+  final favorites = await FavoritesStore.create(userId: auth.currentUser?.id);
   final theme = await ThemeStore.create();
   runApp(
     ProviderScope(

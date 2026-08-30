@@ -162,18 +162,18 @@ UI → mealRepositoryProvider → MealRepository → MealApi (Dio)
 
 ---
 
-### F3.2 — Favorites theo user (multi-account)
+### F3.2 — Favorites theo user (multi-account) — **đã xong**
 
 | Lớp | Việc làm | Map FE |
 |---|---|---|
 | UI | Không đổi UX | — |
-| Data | Key `favorite_meals_{userId}` thay vì global | Namespace localStorage |
-| Arch | `FavoritesRepository` nhận `userId` từ auth | User-scoped store |
-| Lint | — | — |
-| Test | User A favorites ≠ User B after switch login | — |
-| Debug | Log key đang dùng | — |
-| Perf | — | — |
-| Security | Clear favorites key on logout (optional) | — |
+| Data | Key `favorite_meals_{userId}`; migrate legacy key | Namespace localStorage |
+| Arch | `switchUser` / `clearSession` trên `FavoritesStore` | User-scoped store |
+| Lint | Analyze sạch | — |
+| Test | User A ≠ User B sau switch login | — |
+| Debug | Log key khi switchUser | — |
+| Perf | Reload chỉ khi đổi user | — |
+| Security | Logout clear in-memory; data persist theo user | — |
 
 ---
 

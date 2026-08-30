@@ -71,7 +71,10 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 24),
                 FilledButton.tonal(
-                  onPressed: auth.logout,
+                  onPressed: () {
+                    auth.logout();
+                    ref.read(favoritesStoreProvider).clearSession();
+                  },
                   child: const Text('Logout'),
                 ),
               ],
