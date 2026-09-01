@@ -20,6 +20,7 @@
 | Điều hướng `go_router` | Đã xong (F2.1) |
 | Riverpod | Đã xong (F2.2) |
 | Tầng repository cho món ăn | Đã xong (F3.1) |
+| Favorites theo userId | Đã xong (F3.2) |
 
 ---
 
@@ -194,8 +195,32 @@ Home vẫn giữ local fetch state (`_bootstrap` / `_search`); gọi data qua `r
 - `lib/screens/home_screen.dart`, `lib/screens/meal_detail_screen.dart`
 - `test/meal_repository_test.dart`
 
-- **F3.2** Favorites theo `userId` — **làm tiếp**
-- **F3.3** Lịch sử tìm kiếm (tối đa 10 từ khóa, lưu local)
+- **F3.2** Favorites theo `userId` — **đã xong**
+- **F3.3** Lịch sử tìm kiếm (tối đa 10 từ khóa, lưu local) — **làm tiếp**
+
+---
+
+### F3.2 Favorites theo userId — **đã xong**
+
+| Lớp | Việc đã làm | Trạng thái |
+|---|---|---|
+| UI | Không đổi UX Favorites / heart icon | Xong |
+| Data | Key `favorite_meals_{userId}`; migrate key global cũ một lần | Xong |
+| Kiến trúc | `FavoritesStore.switchUser` / `clearSession`; login + logout wired | Xong |
+| Lint | Analyze sạch | Xong |
+| Test | Multi-user + migration + clearSession trong `favorites_store_test.dart` | Xong |
+| Debug | `debugPrint` khi switchUser / migrate / clearSession | Xong |
+| Hiệu năng | Chỉ reload khi đổi user | Xong |
+| Bảo mật | Data tách theo user; logout xóa in-memory | Xong |
+
+**Xong khi:** user A và B có favorites riêng; login lại A vẫn thấy list cũ.
+
+**File liên quan**
+
+- `lib/config/app_constants.dart` (`favoriteMealsKeyFor`)
+- `lib/services/favorites_store.dart`
+- `lib/main.dart`, `lib/screens/login_screen.dart`, `lib/screens/profile_screen.dart`
+- `test/favorites_store_test.dart`
 
 ---
 
@@ -262,4 +287,5 @@ Home vẫn giữ local fetch state (`_bootstrap` / `_search`); gọi data qua `r
 4. F2.1 go_router — đã xong
 5. F2.2 Riverpod — đã xong
 6. F3.1 MealRepository — đã xong
-7. F3.2 Favorites theo userId — **làm tiếp**
+7. F3.2 Favorites theo userId — đã xong
+8. F3.3 Search history — **làm tiếp**
