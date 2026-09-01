@@ -9,7 +9,10 @@ class AppConstants {
 
   static String favoriteMealsKeyFor(String userId) => 'favorite_meals_$userId';
 
+  static String searchHistoryKeyFor(String userId) => 'search_history_$userId';
+
   static const searchDebounce = Duration(milliseconds: 300);
   static const searchMaxLength = 40;
+  static const searchHistoryMaxItems = 10;
   static const categoriesCacheTtl = Duration(minutes: 5);
 }

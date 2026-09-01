@@ -4,18 +4,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'providers/app_providers.dart';
 import 'services/auth_store.dart';
 import 'services/favorites_store.dart';
+import 'services/search_history_store.dart';
 import 'services/theme_store.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final auth = await AuthStore.create();
-  final favorites = await FavoritesStore.create(userId: auth.currentUser?.id);
+  final userId = auth.currentUser?.id;
+  final favorites = await FavoritesStore.create(userId: userId);
+  final searchHistory = await SearchHistoryStore.create(userId: userId);
   final theme = await ThemeStore.create();
   runApp(
     ProviderScope(
       overrides: [
         authStoreProvider.overrideWith((ref) => auth),
         favoritesStoreProvider.overrideWith((ref) => favorites),
+        searchHistoryStoreProvider.overrideWith((ref) => searchHistory),
         themeStoreProvider.overrideWith((ref) => theme),
       ],
       child: const MealFinderApp(),

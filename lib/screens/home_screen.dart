@@ -127,6 +127,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (!mounted) {
         return;
       }
+      await ref.read(searchHistoryStoreProvider).add(keyword);
+      if (!mounted) {
+        return;
+      }
       setState(() {
         _meals = meals;
         _isLoading = false;
@@ -140,6 +144,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         _error = error.toString();
       });
     }
+  }
+
+  Future<void> _searchFromHistory(String keyword) async {
+    _searchDebouncer.cancel();
+    _searchController.value = TextEditingValue(
+      text: keyword,
+      selection: TextSelection.collapsed(offset: keyword.length),
+    );
+    setState(() {});
+    await _search(keyword);
   }
 
   Future<void> _openRandom() async {
@@ -166,6 +180,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final name = ref.watch(authStoreProvider).currentUser?.displayName;
+    final recentSearches = ref.watch(searchHistoryStoreProvider).keywords;
 
     return Scaffold(
       appBar: AppBar(
@@ -224,6 +239,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
             ),
+            if (recentSearches.isNotEmpty)
+              SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                      child: Text(
+                        'Recent searches',
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 40,
+                      child: ListView.separated(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        scrollDirection: Axis.horizontal,
+                        itemCount: recentSearches.length,
+                        separatorBuilder: (_, _) => const SizedBox(width: 8),
+                        itemBuilder: (context, index) {
+                          final keyword = recentSearches[index];
+                          return ActionChip(
+                            avatar: const Icon(Icons.history, size: 18),
+                            label: Text(keyword),
+                            onPressed: () => _searchFromHistory(keyword),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
+              ),
             if (_categories.isNotEmpty)
               SliverToBoxAdapter(
                 child: SizedBox(
