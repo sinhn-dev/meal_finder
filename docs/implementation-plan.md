@@ -22,6 +22,7 @@
 | Tầng repository cho món ăn | Đã xong (F3.1) |
 | Favorites theo userId | Đã xong (F3.2) |
 | Lịch sử tìm kiếm | Đã xong (F3.3) |
+| Auth API-ready (token + 401) | Đã xong (F4.1 + F4.2) |
 
 ---
 
@@ -250,11 +251,32 @@ Home vẫn giữ local fetch state (`_bootstrap` / `_search`); gọi data qua `r
 
 ---
 
-## Giai đoạn 4 — Đăng nhập bản 2 (sẵn sàng API thật)
+## Giai đoạn 4 — Đăng nhập bản 2 (sẵn sàng API thật) — **đã xong**
 
-- **F4.1** Token + lưu bằng `flutter_secure_storage` (không lưu password)
-- **F4.2** Dio: nhận 401 → tự đăng xuất  
-  (giống Axios interceptor)
+### F4.1 + F4.2 Auth API-ready — **đã xong**
+
+| Lớp | Việc đã làm | Trạng thái |
+|---|---|---|
+| UI | Login giữ nguyên; invalid credentials khi user ≠ `demo`; SnackBar session expired | Xong |
+| Data | `AuthSession` `{ user, token }`; token trong `flutter_secure_storage` | Xong |
+| Kiến trúc | `AuthRepository` + `TokenStorage` + `ApiClient`/`AuthInterceptor` + `SessionHandler` | Xong |
+| Lint | Analyze sạch | Xong |
+| Test | `auth_test.dart`, `api_client_test.dart`, login widget tests | Xong |
+| Debug | Dio `LogInterceptor` (debug); redact Authorization header | Xong |
+| Hiệu năng | Interceptor async read token per request | Xong |
+| Bảo mật | Không lưu/log password; token xóa khi logout/401 | Xong |
+
+**Xong khi:** login `demo` + password → có token; logout xóa token; 401 → logout + SnackBar.
+
+**File liên quan**
+
+- `lib/repositories/auth_repository.dart`
+- `lib/services/token_storage.dart`
+- `lib/services/api_client.dart`
+- `lib/services/session_handler.dart`
+- `lib/services/auth_store.dart`
+- `lib/main.dart` (`ApiClient`, `scaffoldMessengerKey`)
+- `test/auth_test.dart`, `test/api_client_test.dart`
 
 ---
 
@@ -315,4 +337,5 @@ Home vẫn giữ local fetch state (`_bootstrap` / `_search`); gọi data qua `r
 6. F3.1 MealRepository — đã xong
 7. F3.2 Favorites theo userId — đã xong
 8. F3.3 Search history — đã xong
-9. F4.1 Secure token — **làm tiếp**
+9. F4.1 + F4.2 Auth API-ready — đã xong
+10. Phase 5 / Phase 6 — **làm tiếp**

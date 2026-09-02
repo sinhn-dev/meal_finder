@@ -3,6 +3,7 @@ class AppConstants {
 
   static const themeModeKey = 'theme_mode';
   static const authUserKey = 'auth_user';
+  static const authTokenKey = 'auth_token';
 
   /// Legacy global key — migrated once per user on first load.
   static const favoriteMealsKey = 'favorite_meals';
