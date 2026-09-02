@@ -21,6 +21,7 @@
 | Riverpod | Đã xong (F2.2) |
 | Tầng repository cho món ăn | Đã xong (F3.1) |
 | Favorites theo userId | Đã xong (F3.2) |
+| Lịch sử tìm kiếm | Đã xong (F3.3) |
 
 ---
 
@@ -196,7 +197,32 @@ Home vẫn giữ local fetch state (`_bootstrap` / `_search`); gọi data qua `r
 - `test/meal_repository_test.dart`
 
 - **F3.2** Favorites theo `userId` — **đã xong**
-- **F3.3** Lịch sử tìm kiếm (tối đa 10 từ khóa, lưu local) — **làm tiếp**
+- **F3.3** Lịch sử tìm kiếm (tối đa 10 từ khóa, lưu local) — **đã xong**
+
+---
+
+### F3.3 Search history — **đã xong**
+
+| Lớp | Việc đã làm | Trạng thái |
+|---|---|---|
+| UI | Chips "Recent searches" dưới SearchBar; tap → search lại | Xong |
+| Data | `search_history_{userId}`; tối đa 10 keyword | Xong |
+| Kiến trúc | `SearchHistoryStore` + `searchHistoryStoreProvider` | Xong |
+| Lint | Analyze sạch | Xong |
+| Test | `test/search_history_store_test.dart` (dedupe, max, multi-user) | Xong |
+| Debug | `debugPrint` khi add / switchUser / clearSession | Xong |
+| Hiệu năng | Giới hạn 10 items | Xong |
+| Bảo mật | Chỉ lưu keyword đã sanitize | Xong |
+
+**Xong khi:** search thành công → chip xuất hiện; tap chip → gọi lại search.
+
+**File liên quan**
+
+- `lib/services/search_history_store.dart`
+- `lib/providers/app_providers.dart`
+- `lib/screens/home_screen.dart`
+- `lib/main.dart`, `lib/screens/login_screen.dart`, `lib/screens/profile_screen.dart`
+- `test/search_history_store_test.dart`
 
 ---
 
@@ -288,4 +314,5 @@ Home vẫn giữ local fetch state (`_bootstrap` / `_search`); gọi data qua `r
 5. F2.2 Riverpod — đã xong
 6. F3.1 MealRepository — đã xong
 7. F3.2 Favorites theo userId — đã xong
-8. F3.3 Search history — **làm tiếp**
+8. F3.3 Search history — đã xong
+9. F4.1 Secure token — **làm tiếp**

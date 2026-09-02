@@ -177,17 +177,17 @@ UI → mealRepositoryProvider → MealRepository → MealApi (Dio)
 
 ---
 
-### F3.3 — Search history (local)
+### F3.3 — Search history (local) — **đã xong**
 
 | Lớp | Việc làm | Map FE |
 |---|---|---|
 | UI | Chips “Recent searches” dưới SearchBar; tap → search lại | Recent searches dropdown |
-| Data | `List<String>` max 10, prefs `search_history` | localStorage array |
-| Arch | `SearchHistoryStore` hoặc method trong Home provider | — |
-| Test | Add dedupe, max length | — |
-| Debug | — | — |
+| Data | `search_history_{userId}` max 10 | localStorage array |
+| Arch | `SearchHistoryStore` + Riverpod provider | — |
+| Test | Add, dedupe, max length, per-user | — |
+| Debug | Log add / switchUser | — |
 | Perf | Limit 10 items | — |
-| Security | Không lưu password trong history | — |
+| Security | Chỉ lưu keyword đã sanitize | — |
 
 ---
 

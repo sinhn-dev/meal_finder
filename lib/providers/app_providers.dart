@@ -7,6 +7,7 @@ import '../router/app_router.dart';
 import '../services/auth_store.dart';
 import '../services/favorites_store.dart';
 import '../services/meal_api.dart';
+import '../services/search_history_store.dart';
 import '../services/theme_store.dart';
 
 final mealApiProvider = Provider<MealApi>((ref) => MealApi());
@@ -22,6 +23,12 @@ final authStoreProvider = ChangeNotifierProvider<AuthStore>((ref) {
 
 final favoritesStoreProvider = ChangeNotifierProvider<FavoritesStore>((ref) {
   throw StateError('Override favoritesStoreProvider in main()');
+});
+
+final searchHistoryStoreProvider = ChangeNotifierProvider<SearchHistoryStore>((
+  ref,
+) {
+  throw StateError('Override searchHistoryStoreProvider in main()');
 });
 
 final themeStoreProvider = ChangeNotifierProvider<ThemeStore>((ref) {

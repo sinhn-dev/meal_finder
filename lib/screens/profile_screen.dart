@@ -74,6 +74,7 @@ class ProfileScreen extends ConsumerWidget {
                   onPressed: () {
                     auth.logout();
                     ref.read(favoritesStoreProvider).clearSession();
+                    ref.read(searchHistoryStoreProvider).clearSession();
                   },
                   child: const Text('Logout'),
                 ),
