@@ -193,30 +193,28 @@ UI → mealRepositoryProvider → MealRepository → MealApi (Dio)
 
 ## Phase 4 — Auth v2 & API-ready (tuần 4)
 
-### F4.1 — Auth Repository + fake REST (JSONPlaceholder / mock server)
+### F4.1 — Auth Repository + secure token — **đã xong**
 
 | Lớp | Việc làm | Map FE |
 |---|---|---|
-| UI | Login giữ nguyên; thêm inline “invalid credentials” (mock rule: user ≠ `demo`) | Error message from API |
-| Data | `POST /login` mock → `{ user, token }`; lưu token riêng key `auth_token` | JWT in memory + secure storage |
+| UI | Login giữ nguyên; invalid credentials khi user ≠ `demo` | Error message from API |
+| Data | Mock login → `{ user, token }`; `flutter_secure_storage` | JWT + secure storage |
 | Arch | `AuthRepository` thay `AuthService` trực tiếp | authService abstraction |
-| Lint | — | — |
-| Test | Mock Dio adapter 401 / 200 | — |
-| Debug | Dio LogInterceptor debug-only | — |
-| Perf | — | — |
-| Security | **flutter_secure_storage** cho token; never log token; clear on logout | httpOnly cookie analog |
+| Test | Repository + AuthStore token lifecycle | Mock 200/401 |
+| Debug | Dio LogInterceptor redacts Bearer token | Axios interceptors |
+| Security | Never log token; clear on logout | httpOnly cookie analog |
 
 ---
 
-### F4.2 — Dio interceptor (401 → logout)
+### F4.2 — Dio interceptor (401 → logout) — **đã xong**
 
 | Lớp | Việc làm | Map FE |
 |---|---|---|
 | UI | SnackBar “Session expired” | Global error handler |
-| Data | Interceptor read token header | Axios request interceptor |
-| Arch | Central `ApiClient` factory | apiClient singleton |
-| Test | 401 triggers logout mock | — |
-| Security | Token refresh deferred Phase 5 | — |
+| Data | Interceptor reads token header | Axios request interceptor |
+| Arch | `ApiClient` + `SessionHandler` | apiClient singleton |
+| Test | 401 triggers `onUnauthorized` | — |
+| Security | Auto logout on 401 | — |
 
 ---
 

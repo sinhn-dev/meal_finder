@@ -10,7 +10,9 @@ import '../services/meal_api.dart';
 import '../services/search_history_store.dart';
 import '../services/theme_store.dart';
 
-final mealApiProvider = Provider<MealApi>((ref) => MealApi());
+final mealApiProvider = Provider<MealApi>((ref) {
+  throw StateError('Override mealApiProvider in main()');
+});
 
 /// UI nên đọc provider này, không gọi [mealApiProvider] trực tiếp.
 final mealRepositoryProvider = Provider<MealRepository>((ref) {
