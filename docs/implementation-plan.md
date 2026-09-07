@@ -3,6 +3,7 @@
 > File làm việc: xong feature nào thì đánh dấu feature đó.
 > Roadmap kiến trúc dài hạn: [`product-roadmap.md`](./product-roadmap.md)
 > Login đã xong: [`login-plan.md`](./login-plan.md)
+> Phase 6 (icon, MVVM, DB, offline, maps): [`phase-6-learning-wave.md`](./phase-6-learning-wave.md)
 
 **Nguyên tắc mỗi tính năng:** giao diện → dữ liệu → kiến trúc & state → lint → test → debug → hiệu năng → bảo mật
 
@@ -23,6 +24,7 @@
 | Favorites theo userId | Đã xong (F3.2) |
 | Lịch sử tìm kiếm | Đã xong (F3.3) |
 | Auth API-ready (token + 401) | Đã xong (F4.1 + F4.2) |
+| App icon (P1) | Đã xong (chờ merge) |
 
 ---
 
@@ -338,4 +340,6 @@ Home vẫn giữ local fetch state (`_bootstrap` / `_search`); gọi data qua `r
 7. F3.2 Favorites theo userId — đã xong
 8. F3.3 Search history — đã xong
 9. F4.1 + F4.2 Auth API-ready — đã xong
-10. Phase 5 / Phase 6 — **làm tiếp**
+10. Phase 6 Learning Wave — **làm tiếp** (xem [`phase-6-learning-wave.md`](./phase-6-learning-wave.md))
+    - P1 App icon — **đã xong** (branch `feature/app-icon`)
+    - P2 MVVM Home → P3 Drift cache → P4 Offline → P5 Location + Maps
