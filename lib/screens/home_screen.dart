@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../config/app_constants.dart';
 import '../models/meal.dart';
 import '../providers/app_providers.dart';
+import '../providers/home_meals_notifier.dart';
 import '../router/app_routes.dart';
 import '../utils/debouncer.dart';
 import '../utils/search_query.dart';
@@ -20,16 +21,11 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _searchController = TextEditingController();
   final _searchDebouncer = Debouncer();
-  List<String> _categories = [];
-  String? _selectedCategory;
-  List<MealSummary> _meals = [];
-  bool _isLoading = true;
-  String? _error;
 
   @override
   void initState() {
     super.initState();
-    _bootstrap();
+    Future.microtask(() => ref.read(homeMealsProvider.notifier).bootstrap());
   }
 
   @override
@@ -48,102 +44,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       );
     }
     setState(() {});
-    _searchDebouncer.run(() => _search(keyword));
-  }
-
-  Future<void> _bootstrap() async {
-    final mealsRepo = ref.read(mealRepositoryProvider);
-    try {
-      final categories = await mealsRepo.categories();
-      final firstCategory = categories.isNotEmpty ? categories.first : null;
-      final meals = firstCategory == null
-          ? await mealsRepo.search('chicken')
-          : await mealsRepo.byCategory(firstCategory);
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _categories = categories;
-        _selectedCategory = firstCategory;
-        _meals = meals;
-        _isLoading = false;
-        _error = null;
-      });
-    } catch (error) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _isLoading = false;
-        _error = error.toString();
-      });
-    }
-  }
-
-  Future<void> _loadCategory(String category) async {
-    _searchDebouncer.cancel();
-    setState(() {
-      _selectedCategory = category;
-      _isLoading = true;
-      _error = null;
+    _searchDebouncer.run(() {
+      ref.read(homeMealsProvider.notifier).search(keyword);
     });
-    try {
-      final meals = await ref.read(mealRepositoryProvider).byCategory(category);
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _meals = meals;
-        _isLoading = false;
-      });
-    } catch (error) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _isLoading = false;
-        _error = error.toString();
-      });
-    }
-  }
-
-  Future<void> _search(String query) async {
-    final keyword = SearchQuery.sanitize(query);
-    if (keyword.isEmpty) {
-      if (_categories.isNotEmpty) {
-        await _loadCategory(_selectedCategory ?? _categories.first);
-      }
-      return;
-    }
-
-    debugPrint('HomeScreen: search="$keyword"');
-    setState(() {
-      _selectedCategory = null;
-      _isLoading = true;
-      _error = null;
-    });
-    try {
-      final meals = await ref.read(mealRepositoryProvider).search(keyword);
-      if (!mounted) {
-        return;
-      }
-      await ref.read(searchHistoryStoreProvider).add(keyword);
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _meals = meals;
-        _isLoading = false;
-      });
-    } catch (error) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _isLoading = false;
-        _error = error.toString();
-      });
-    }
   }
 
   Future<void> _searchFromHistory(String keyword) async {
@@ -153,12 +56,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       selection: TextSelection.collapsed(offset: keyword.length),
     );
     setState(() {});
-    await _search(keyword);
+    await ref.read(homeMealsProvider.notifier).search(keyword);
   }
 
   Future<void> _openRandom() async {
     try {
-      final meal = await ref.read(mealRepositoryProvider).random();
+      final meal = await ref.read(homeMealsProvider.notifier).openRandom();
       if (!mounted || meal == null) {
         return;
       }
@@ -177,10 +80,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     context.push(AppRoutes.meal(meal.id), extra: meal);
   }
 
+  void _clearSearch() {
+    _searchDebouncer.cancel();
+    _searchController.clear();
+    setState(() {});
+    final categories = ref.read(homeMealsProvider).categories;
+    if (categories.isNotEmpty) {
+      ref.read(homeMealsProvider.notifier).loadCategory(categories.first);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final name = ref.watch(authStoreProvider).currentUser?.displayName;
     final recentSearches = ref.watch(searchHistoryStoreProvider).keywords;
+    final home = ref.watch(homeMealsProvider);
+    final notifier = ref.read(homeMealsProvider.notifier);
 
     return Scaffold(
       appBar: AppBar(
@@ -202,11 +117,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       body: RefreshIndicator(
         onRefresh: () async {
-          if (_selectedCategory != null) {
-            await _loadCategory(_selectedCategory!);
-            return;
+          _searchDebouncer.cancel();
+          await notifier.refresh();
+          final next = ref.read(homeMealsProvider);
+          if (next.query.isEmpty) {
+            _searchController.clear();
+          } else {
+            _searchController.value = TextEditingValue(
+              text: next.query,
+              selection: TextSelection.collapsed(offset: next.query.length),
+            );
           }
-          await _search(_searchController.text);
+          setState(() {});
         },
         child: CustomScrollView(
           slivers: [
@@ -220,21 +142,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   trailing: [
                     if (_searchController.text.isNotEmpty)
                       IconButton(
-                        onPressed: () {
-                          _searchDebouncer.cancel();
-                          _searchController.clear();
-                          setState(() {});
-                          if (_categories.isNotEmpty) {
-                            _loadCategory(_categories.first);
-                          }
-                        },
+                        onPressed: _clearSearch,
                         icon: const Icon(Icons.close),
                       ),
                   ],
                   onChanged: _onQueryChanged,
                   onSubmitted: (value) {
                     _searchDebouncer.cancel();
-                    _search(value);
+                    notifier.search(value);
                   },
                 ),
               ),
@@ -272,41 +187,46 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ],
                 ),
               ),
-            if (_categories.isNotEmpty)
+            if (home.categories.isNotEmpty)
               SliverToBoxAdapter(
                 child: SizedBox(
                   height: 52,
                   child: ListView.separated(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     scrollDirection: Axis.horizontal,
-                    itemCount: _categories.length,
+                    itemCount: home.categories.length,
                     separatorBuilder: (_, _) => const SizedBox(width: 8),
                     itemBuilder: (context, index) {
-                      final category = _categories[index];
+                      final category = home.categories[index];
                       return FilterChip(
                         label: Text(category),
-                        selected: _selectedCategory == category,
-                        onSelected: (_) => _loadCategory(category),
+                        selected: home.selectedCategory == category,
+                        onSelected: (_) {
+                          _searchDebouncer.cancel();
+                          _searchController.clear();
+                          setState(() {});
+                          notifier.loadCategory(category);
+                        },
                       );
                     },
                   ),
                 ),
               ),
-            if (_isLoading)
+            if (home.isLoading)
               const SliverFillRemaining(
                 child: Center(child: CircularProgressIndicator()),
               )
-            else if (_error != null)
+            else if (home.error != null)
               SliverFillRemaining(
                 child: _EmptyState(
                   icon: Icons.wifi_off_outlined,
                   title: 'Cannot load meals',
-                  message: _error!,
+                  message: home.error!,
                   actionLabel: 'Retry',
-                  onAction: _bootstrap,
+                  onAction: notifier.bootstrap,
                 ),
               )
-            else if (_meals.isEmpty)
+            else if (home.meals.isEmpty)
               const SliverFillRemaining(
                 child: _EmptyState(
                   icon: Icons.soup_kitchen_outlined,
@@ -325,9 +245,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     childAspectRatio: 0.78,
                   ),
                   delegate: SliverChildBuilderDelegate((context, index) {
-                    final meal = _meals[index];
+                    final meal = home.meals[index];
                     return MealCard(meal: meal, onTap: () => _openDetail(meal));
-                  }, childCount: _meals.length),
+                  }, childCount: home.meals.length),
                 ),
               ),
           ],

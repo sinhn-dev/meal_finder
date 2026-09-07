@@ -24,7 +24,8 @@
 | Favorites theo userId | Đã xong (F3.2) |
 | Lịch sử tìm kiếm | Đã xong (F3.3) |
 | Auth API-ready (token + 401) | Đã xong (F4.1 + F4.2) |
-| App icon (P1) | Đã xong (chờ merge) |
+| App icon (P1) | Đã merge |
+| MVVM Home ViewModel (P2) | Đã xong (chờ merge) |
 
 ---
 
@@ -341,5 +342,6 @@ Home vẫn giữ local fetch state (`_bootstrap` / `_search`); gọi data qua `r
 8. F3.3 Search history — đã xong
 9. F4.1 + F4.2 Auth API-ready — đã xong
 10. Phase 6 Learning Wave — **làm tiếp** (xem [`phase-6-learning-wave.md`](./phase-6-learning-wave.md))
-    - P1 App icon — **đã xong** (branch `feature/app-icon`)
-    - P2 MVVM Home → P3 Drift cache → P4 Offline → P5 Location + Maps
+    - P1 App icon — **đã merge**
+    - P2 MVVM Home — **đã xong** (branch `feature/mvvm-home-notifier`)
+    - P3 Drift cache → P4 Offline → P5 Location + Maps
