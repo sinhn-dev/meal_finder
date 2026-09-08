@@ -101,4 +101,9 @@ void main() {
 
     expect(api.categoriesCalls, 2);
   });
+
+  test('getCached* returns empty when local data source is absent', () async {
+    expect(await repository.getCachedBySourceKey('category:Beef'), isEmpty);
+    expect(await repository.getCachedCategories(), isEmpty);
+  });
 }

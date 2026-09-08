@@ -49,6 +49,13 @@ class _FakeMealRepository implements MealRepository {
 
   @override
   Future<Meal?> random() async => null;
+
+  @override
+  Future<List<MealSummary>> getCachedBySourceKey(String sourceKey) async =>
+      const [];
+
+  @override
+  Future<List<String>> getCachedCategories() async => const [];
 }
 
 void main() {
