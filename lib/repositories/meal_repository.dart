@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 
 import '../config/app_constants.dart';
+import '../data/local/meal_cache_keys.dart';
+import '../data/local/meal_local_data_source.dart';
 import '../models/meal.dart';
 import '../services/meal_api.dart';
 
@@ -15,16 +17,23 @@ abstract class MealRepository {
   Future<Meal?> random();
 
   Future<List<String>> categories();
+
+  /// Read previously persisted list cache (used by offline path in P4).
+  Future<List<MealSummary>> getCachedBySourceKey(String sourceKey);
+
+  Future<List<String>> getCachedCategories();
 }
 
-/// Remote repository backed by TheMealDB via [MealApi].
+/// Remote repository backed by TheMealDB via [MealApi], with optional Drift cache.
 class MealRepositoryImpl implements MealRepository {
   MealRepositoryImpl(
     this._api, {
+    MealLocalDataSource? local,
     this.categoriesCacheTtl = AppConstants.categoriesCacheTtl,
-  });
+  }) : _local = local;
 
   final MealApi _api;
+  final MealLocalDataSource? _local;
   final Duration categoriesCacheTtl;
 
   List<String>? _cachedCategories;
@@ -33,13 +42,20 @@ class MealRepositoryImpl implements MealRepository {
   @override
   Future<List<MealSummary>> search(String query) async {
     debugPrint('MealRepository: search query="$query"');
-    return _api.search(query);
+    final meals = await _api.search(query);
+    await _local?.replaceMealsForSource(MealCacheKeys.search(query), meals);
+    return meals;
   }
 
   @override
   Future<List<MealSummary>> byCategory(String category) async {
     debugPrint('MealRepository: byCategory="$category"');
-    return _api.byCategory(category);
+    final meals = await _api.byCategory(category);
+    await _local?.replaceMealsForSource(
+      MealCacheKeys.category(category),
+      meals,
+    );
+    return meals;
   }
 
   @override
@@ -61,7 +77,9 @@ class MealRepositoryImpl implements MealRepository {
     if (cached != null &&
         cachedAt != null &&
         DateTime.now().difference(cachedAt) < categoriesCacheTtl) {
-      debugPrint('MealRepository: categories cache hit (${cached.length})');
+      debugPrint(
+        'MealRepository: categories memory cache hit (${cached.length})',
+      );
       return cached;
     }
 
@@ -69,7 +87,18 @@ class MealRepositoryImpl implements MealRepository {
     final categories = await _api.categories();
     _cachedCategories = categories;
     _categoriesCachedAt = DateTime.now();
+    await _local?.replaceCategories(categories);
     return categories;
+  }
+
+  @override
+  Future<List<MealSummary>> getCachedBySourceKey(String sourceKey) async {
+    return _local?.getMealsBySourceKey(sourceKey) ?? const [];
+  }
+
+  @override
+  Future<List<String>> getCachedCategories() async {
+    return _local?.getCategories() ?? const [];
   }
 
   @visibleForTesting

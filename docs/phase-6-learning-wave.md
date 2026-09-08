@@ -27,7 +27,7 @@
 |---|---|---|---|---|
 | **P1** | `feature/app-icon` | Đã merge | — | Đã merge |
 | **P2** | `feature/mvvm-home-notifier` | Đã xong (code) | — | Chưa merge |
-| **P3** | `feature/local-db-cache` | Chưa làm | — | — |
+| **P3** | `feature/local-db-cache` | Xong (chờ PR) | — | — |
 | **P4** | `feature/offline-middleware` | Chưa làm | — | — |
 | **P5** | `feature/location-maps-cuisine` | Chưa làm | — | — |
 
@@ -192,8 +192,8 @@ MealRepository (Model / data access)
 | | |
 |---|---|
 | **Branch** | `feature/local-db-cache` |
-| **Packages** | `drift`, `sqlite3_flutter_libs`, `path_provider`, `drift_dev`, `build_runner` |
-| **Trạng thái** | Chưa làm |
+| **Packages** | `drift`, `drift_flutter`, `sqlite3_flutter_libs`, `path_provider`, `path`, `drift_dev`, `build_runner` |
+| **Trạng thái** | Xong (chờ PR / merge) |
 
 ### Mục đích
 
@@ -208,7 +208,7 @@ Lưu cache món + categories **trên máy** (SQLite). Nền cho P4 offline. **Kh
 
 `sourceKey` ví dụ: `category:Beef`, `search:pasta`, `area:Vietnamese`.
 
-**Không làm v1:** cache full meal detail (Detail offline) — để sau nếu cần.
+**Không làm v1:** cache full meal detail (Detail offline) — để sau nếu cần. Offline UI = P4.
 
 ### Arch
 
@@ -222,17 +222,18 @@ MealRepositoryImpl
 
 ### Việc làm
 
-- [ ] Định nghĩa Drift tables + generate code
-- [ ] `MealLocalDataSource` (DAO)
-- [ ] `MealRepositoryImpl` write-through sau search / byCategory / categories
-- [ ] Mở DB trong `main()` hoặc lazy provider; test dùng in-memory
-- [ ] Test DAO insert/read + repo ghi cache
+- [x] Định nghĩa Drift tables + generate code
+- [x] `MealLocalDataSource` (DAO)
+- [x] `MealRepositoryImpl` write-through sau search / byCategory / categories
+- [x] Mở DB trong `main()` + `mealLocalDataSourceProvider`; test dùng in-memory
+- [x] Test DAO insert/read + repo ghi cache
 
 ### File dự kiến
 
 | File | Thay đổi |
 |---|---|
 | `lib/data/local/app_database.dart` | Drift DB |
+| `lib/data/local/meal_cache_keys.dart` | `category:` / `search:` / `area:` |
 | `lib/data/local/meal_local_data_source.dart` | DAO |
 | `lib/repositories/meal_repository.dart` | Inject local + write cache |
 | `lib/main.dart` / providers | Wire DB |
@@ -242,19 +243,19 @@ MealRepositoryImpl
 
 | Lớp | Việc | Xong |
 |---|---|---|
-| UI | Không đổi (hoặc debug-only) | [ ] |
-| Data | Drift schema + DAO | [ ] |
-| Arch | Remote + Local trong repository | [ ] |
-| Lint | analyze + generated files | [ ] |
-| Test | DAO + repo cache write | [ ] |
-| Debug | Log sourceKey khi ghi/đọc | [ ] |
-| Perf | Index theo sourceKey nếu cần | [ ] |
-| Security | Chỉ cache public meal data | [ ] |
+| UI | Không đổi (cache silent) | [x] |
+| Data | Drift schema + DAO | [x] |
+| Arch | Remote + Local trong repository | [x] |
+| Lint | analyze + generated files | [x] |
+| Test | DAO + repo cache write | [x] |
+| Debug | Log sourceKey khi ghi/đọc | [x] |
+| Perf | PK `(id, sourceKey)` đủ cho v1 | [x] |
+| Security | Chỉ cache public meal data | [x] |
 
 ### Done khi
 
-- [ ] Load category online → DB có rows
-- [ ] Restart app → đọc được cache qua `getCached*`
+- [x] Load category/search online → DB có rows (write-through)
+- [x] Đọc được cache qua `getCached*` (P4 sẽ dùng khi offline)
 
 ### Commit gợi ý
 

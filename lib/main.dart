@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:dio/dio.dart';
 
+import 'data/local/app_database.dart';
+import 'data/local/meal_local_data_source.dart';
 import 'providers/app_providers.dart';
 import 'services/api_client.dart';
 import 'services/auth_store.dart';
@@ -24,6 +26,8 @@ Future<void> main() async {
   final favorites = await FavoritesStore.create(userId: userId);
   final searchHistory = await SearchHistoryStore.create(userId: userId);
   final theme = await ThemeStore.create();
+  final database = AppDatabase();
+  final mealLocal = MealLocalDataSource(database);
 
   final sessionHandler = SessionHandler(
     messengerKey: scaffoldMessengerKey,
@@ -52,6 +56,7 @@ Future<void> main() async {
         searchHistoryStoreProvider.overrideWith((ref) => searchHistory),
         themeStoreProvider.overrideWith((ref) => theme),
         mealApiProvider.overrideWith((ref) => mealApi),
+        mealLocalDataSourceProvider.overrideWith((ref) => mealLocal),
       ],
       child: const MealFinderApp(),
     ),
