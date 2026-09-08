@@ -26,9 +26,9 @@
 | ID | Branch | Trạng thái | PR | Merge vào main |
 |---|---|---|---|---|
 | **P1** | `feature/app-icon` | Đã merge | — | Đã merge |
-| **P2** | `feature/mvvm-home-notifier` | Đã xong (code) | — | Chưa merge |
+| **P2** | `feature/mvvm-home-notifier` | Đã merge | — | Đã merge |
 | **P3** | `feature/local-db-cache` | Xong (chờ PR) | — | — |
-| **P4** | `feature/offline-middleware` | Chưa làm | — | — |
+| **P4** | `feature/offline-middleware` | Xong (chờ PR; based on P3) | — | — |
 | **P5** | `feature/location-maps-cuisine` | Chưa làm | — | — |
 
 **Phụ thuộc**
@@ -269,7 +269,7 @@ MealRepositoryImpl
 |---|---|
 | **Branch** | `feature/offline-middleware` |
 | **Packages** | `connectivity_plus` |
-| **Trạng thái** | Chưa làm |
+| **Trạng thái** | Xong (chờ PR; branch dựa trên P3) |
 
 ### Mục đích
 
@@ -286,18 +286,19 @@ Detect mất mạng → banner + đọc cache Drift; không crash.
 
 ### Việc làm
 
-- [ ] `ConnectivityService` / `connectivityProvider` (stream)
-- [ ] Banner trên `AppShell`
-- [ ] `MealRepository`: offline → đọc cache; online fail → fallback cache
-- [ ] `HomeMealsState`: `isOffline`, `isFromCache` (chip/subtitle trên Home)
-- [ ] Ưu tiên logic trong **repository** (dễ test); giữ `AuthInterceptor` như F4
-- [ ] Test offline → cache; online empty cache → error
+- [x] `ConnectivityService` / `isOnlineProvider` (stream)
+- [x] Banner trên `AppShell`
+- [x] `MealRepository`: offline → đọc cache; online fail → fallback cache (`FetchResult`)
+- [x] `HomeMealsState`: `isOffline`, `isFromCache` (chip trên Home)
+- [x] Ưu tiên logic trong **repository** (dễ test); giữ `AuthInterceptor` như F4
+- [x] Test offline → cache; offline empty → error; online fail → fallback
 
 ### File dự kiến
 
 | File | Thay đổi |
 |---|---|
 | `lib/services/connectivity_service.dart` | Online/offline |
+| `lib/models/fetch_result.dart` | `data` + `isFromCache` |
 | `lib/screens/app_shell.dart` | Banner |
 | `lib/repositories/meal_repository.dart` | Offline path |
 | `lib/providers/home_meals_notifier.dart` | isOffline / isFromCache |
@@ -307,18 +308,19 @@ Detect mất mạng → banner + đọc cache Drift; không crash.
 
 | Lớp | Việc | Xong |
 |---|---|---|
-| UI | Banner + cache indicator | [ ] |
-| Data | Đọc Drift khi offline | [ ] |
-| Arch | Connectivity + repo fallback | [ ] |
-| Lint | analyze | [ ] |
-| Test | Offline / fallback cases | [ ] |
-| Debug | Log online/offline + cache hit | [ ] |
-| Perf | Không spam connectivity | [ ] |
-| Security | Không lộ token trong offline path | [ ] |
+| UI | Banner + cache indicator | [x] |
+| Data | Đọc Drift khi offline | [x] |
+| Arch | Connectivity + repo fallback | [x] |
+| Lint | analyze | [x] |
+| Test | Offline / fallback cases | [x] |
+| Debug | Log online/offline + cache hit | [x] |
+| Perf | Stream connectivity (không poll) | [x] |
+| Security | Offline path không đụng token | [x] |
 
 ### Done khi
 
-- [ ] Airplane mode sau khi đã load data → list + banner, không crash
+- [x] Airplane mode sau khi đã load data → list + banner, không crash (manual)
+- [x] Unit tests cover offline / fallback
 
 ### Commit gợi ý
 

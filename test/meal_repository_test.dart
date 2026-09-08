@@ -3,6 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meal_finder/models/meal.dart';
 import 'package:meal_finder/repositories/meal_repository.dart';
 import 'package:meal_finder/services/meal_api.dart';
+import 'package:meal_finder/data/local/app_database.dart';
+import 'package:meal_finder/data/local/meal_cache_keys.dart';
+import 'package:meal_finder/data/local/meal_local_data_source.dart';
+import 'package:drift/native.dart';
 
 class _FakeMealApi extends MealApi {
   _FakeMealApi();
@@ -12,22 +16,34 @@ class _FakeMealApi extends MealApi {
   int byCategoryCalls = 0;
   int lookupCalls = 0;
   int randomCalls = 0;
+  bool failSearch = false;
+  bool failByCategory = false;
+  bool failCategories = false;
 
   @override
   Future<List<String>> categories() async {
     categoriesCalls += 1;
+    if (failCategories) {
+      throw const MealApiException('categories network error');
+    }
     return const ['Beef', 'Chicken'];
   }
 
   @override
   Future<List<MealSummary>> search(String query) async {
     searchCalls += 1;
+    if (failSearch) {
+      throw const MealApiException('search network error');
+    }
     return [MealSummary(id: '1', name: 'Searched $query', thumbnail: '')];
   }
 
   @override
   Future<List<MealSummary>> byCategory(String category) async {
     byCategoryCalls += 1;
+    if (failByCategory) {
+      throw const MealApiException('category network error');
+    }
     return [MealSummary(id: '2', name: '$category meal', thumbnail: '')];
   }
 
@@ -62,8 +78,9 @@ void main() {
     final lookup = await repository.lookup('52772');
     final random = await repository.random();
 
-    expect(searched.single.name, 'Searched pasta');
-    expect(byCategory.single.name, 'Beef meal');
+    expect(searched.data.single.name, 'Searched pasta');
+    expect(searched.isFromCache, isFalse);
+    expect(byCategory.data.single.name, 'Beef meal');
     expect(lookup?.id, '52772');
     expect(random?.name, 'Random');
     expect(api.searchCalls, 1);
@@ -76,8 +93,8 @@ void main() {
     final first = await repository.categories();
     final second = await repository.categories();
 
-    expect(first, ['Beef', 'Chicken']);
-    expect(second, ['Beef', 'Chicken']);
+    expect(first.data, ['Beef', 'Chicken']);
+    expect(second.data, ['Beef', 'Chicken']);
     expect(api.categoriesCalls, 1);
   });
 
@@ -105,5 +122,74 @@ void main() {
   test('getCached* returns empty when local data source is absent', () async {
     expect(await repository.getCachedBySourceKey('category:Beef'), isEmpty);
     expect(await repository.getCachedCategories(), isEmpty);
+  });
+
+  test('offline search returns Drift cache with isFromCache', () async {
+    final database = AppDatabase(NativeDatabase.memory());
+    addTearDown(database.close);
+    final local = MealLocalDataSource(database);
+    await local.replaceMealsForSource(MealCacheKeys.search('pasta'), const [
+      MealSummary(id: '9', name: 'Cached pasta', thumbnail: ''),
+    ]);
+
+    final offlineRepo = MealRepositoryImpl(
+      api,
+      local: local,
+      isOnline: () async => false,
+    );
+
+    final result = await offlineRepo.search('pasta');
+
+    expect(result.isFromCache, isTrue);
+    expect(result.data.single.name, 'Cached pasta');
+    expect(api.searchCalls, 0);
+  });
+
+  test('offline search without cache throws clear error', () async {
+    final offlineRepo = MealRepositoryImpl(api, isOnline: () async => false);
+
+    expect(
+      () => offlineRepo.search('pasta'),
+      throwsA(
+        isA<MealApiException>().having(
+          (e) => e.message,
+          'message',
+          contains('offline'),
+        ),
+      ),
+    );
+    expect(api.searchCalls, 0);
+  });
+
+  test('online failure falls back to Drift cache', () async {
+    final database = AppDatabase(NativeDatabase.memory());
+    addTearDown(database.close);
+    final local = MealLocalDataSource(database);
+    await local.replaceMealsForSource(MealCacheKeys.category('Beef'), const [
+      MealSummary(id: '3', name: 'Cached beef', thumbnail: ''),
+    ]);
+    api.failByCategory = true;
+
+    final repo = MealRepositoryImpl(api, local: local);
+
+    final result = await repo.byCategory('Beef');
+
+    expect(result.isFromCache, isTrue);
+    expect(result.data.single.name, 'Cached beef');
+    expect(api.byCategoryCalls, 1);
+  });
+
+  test('online categories failure falls back to Drift', () async {
+    final database = AppDatabase(NativeDatabase.memory());
+    addTearDown(database.close);
+    final local = MealLocalDataSource(database);
+    await local.replaceCategories(const ['Seafood']);
+    api.failCategories = true;
+
+    final repo = MealRepositoryImpl(api, local: local);
+    final result = await repo.categories();
+
+    expect(result.isFromCache, isTrue);
+    expect(result.data, ['Seafood']);
   });
 }

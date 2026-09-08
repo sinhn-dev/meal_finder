@@ -13,6 +13,8 @@ class HomeMealsState {
     required this.isLoading,
     required this.error,
     required this.query,
+    required this.isOffline,
+    required this.isFromCache,
   });
 
   factory HomeMealsState.initial() {
@@ -23,6 +25,8 @@ class HomeMealsState {
       isLoading: true,
       error: null,
       query: '',
+      isOffline: false,
+      isFromCache: false,
     );
   }
 
@@ -32,6 +36,8 @@ class HomeMealsState {
   final bool isLoading;
   final String? error;
   final String query;
+  final bool isOffline;
+  final bool isFromCache;
 
   HomeMealsState copyWith({
     List<String>? categories,
@@ -42,6 +48,8 @@ class HomeMealsState {
     String? error,
     bool clearError = false,
     String? query,
+    bool? isOffline,
+    bool? isFromCache,
   }) {
     return HomeMealsState(
       categories: categories ?? this.categories,
@@ -52,13 +60,21 @@ class HomeMealsState {
       isLoading: isLoading ?? this.isLoading,
       error: clearError ? null : (error ?? this.error),
       query: query ?? this.query,
+      isOffline: isOffline ?? this.isOffline,
+      isFromCache: isFromCache ?? this.isFromCache,
     );
   }
 }
 
 /// ViewModel for Discover/Home — fetch logic lives here, not in the Widget.
 class HomeMealsNotifier extends StateNotifier<HomeMealsState> {
-  HomeMealsNotifier(this._ref) : super(HomeMealsState.initial());
+  HomeMealsNotifier(this._ref) : super(HomeMealsState.initial()) {
+    _ref.listen<AsyncValue<bool>>(isOnlineProvider, (previous, next) {
+      next.whenData((online) {
+        state = state.copyWith(isOffline: !online);
+      });
+    }, fireImmediately: true);
+  }
 
   final Ref _ref;
 
@@ -66,19 +82,21 @@ class HomeMealsNotifier extends StateNotifier<HomeMealsState> {
     state = state.copyWith(isLoading: true, clearError: true);
     try {
       final repo = _ref.read(mealRepositoryProvider);
-      final categories = await repo.categories();
+      final categoriesResult = await repo.categories();
+      final categories = categoriesResult.data;
       final firstCategory = categories.isNotEmpty ? categories.first : null;
-      final meals = firstCategory == null
+      final mealsResult = firstCategory == null
           ? await repo.search('chicken')
           : await repo.byCategory(firstCategory);
       state = state.copyWith(
         categories: categories,
         selectedCategory: firstCategory,
         clearSelectedCategory: firstCategory == null,
-        meals: meals,
+        meals: mealsResult.data,
         isLoading: false,
         clearError: true,
         query: '',
+        isFromCache: categoriesResult.isFromCache || mealsResult.isFromCache,
       );
     } catch (error) {
       state = state.copyWith(isLoading: false, error: error.toString());
@@ -93,10 +111,15 @@ class HomeMealsNotifier extends StateNotifier<HomeMealsState> {
       query: '',
     );
     try {
-      final meals = await _ref
+      final result = await _ref
           .read(mealRepositoryProvider)
           .byCategory(category);
-      state = state.copyWith(meals: meals, isLoading: false, clearError: true);
+      state = state.copyWith(
+        meals: result.data,
+        isLoading: false,
+        clearError: true,
+        isFromCache: result.isFromCache,
+      );
     } catch (error) {
       state = state.copyWith(isLoading: false, error: error.toString());
     }
@@ -119,9 +142,14 @@ class HomeMealsNotifier extends StateNotifier<HomeMealsState> {
       query: keyword,
     );
     try {
-      final meals = await _ref.read(mealRepositoryProvider).search(keyword);
+      final result = await _ref.read(mealRepositoryProvider).search(keyword);
       await _ref.read(searchHistoryStoreProvider).add(keyword);
-      state = state.copyWith(meals: meals, isLoading: false, clearError: true);
+      state = state.copyWith(
+        meals: result.data,
+        isLoading: false,
+        clearError: true,
+        isFromCache: result.isFromCache,
+      );
     } catch (error) {
       state = state.copyWith(isLoading: false, error: error.toString());
     }

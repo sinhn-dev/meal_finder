@@ -6,6 +6,7 @@ import '../data/local/meal_local_data_source.dart';
 import '../repositories/meal_repository.dart';
 import '../router/app_router.dart';
 import '../services/auth_store.dart';
+import '../services/connectivity_service.dart';
 import '../services/favorites_store.dart';
 import '../services/meal_api.dart';
 import '../services/search_history_store.dart';
@@ -20,11 +21,24 @@ final mealLocalDataSourceProvider = Provider<MealLocalDataSource?>(
   (ref) => null,
 );
 
+final connectivityServiceProvider = Provider<ConnectivityService>((ref) {
+  return ConnectivityService();
+});
+
+/// Current online status; starts with a one-shot check then listens to changes.
+final isOnlineProvider = StreamProvider<bool>((ref) async* {
+  final service = ref.watch(connectivityServiceProvider);
+  yield await service.isOnline;
+  yield* service.onStatusChanged;
+});
+
 /// UI nên đọc provider này, không gọi [mealApiProvider] trực tiếp.
 final mealRepositoryProvider = Provider<MealRepository>((ref) {
+  final connectivity = ref.watch(connectivityServiceProvider);
   return MealRepositoryImpl(
     ref.watch(mealApiProvider),
     local: ref.watch(mealLocalDataSourceProvider),
+    isOnline: () => connectivity.isOnline,
   );
 });
 
