@@ -25,8 +25,8 @@
 
 | ID | Branch | Trạng thái | PR | Merge vào main |
 |---|---|---|---|---|
-| **P1** | `feature/app-icon` | Đã xong (code) | — | Chưa merge |
-| **P2** | `feature/mvvm-home-notifier` | Chưa làm | — | — |
+| **P1** | `feature/app-icon` | Đã merge | — | Đã merge |
+| **P2** | `feature/mvvm-home-notifier` | Đã xong (code) | — | Chưa merge |
 | **P3** | `feature/local-db-cache` | Chưa làm | — | — |
 | **P4** | `feature/offline-middleware` | Chưa làm | — | — |
 | **P5** | `feature/location-maps-cuisine` | Chưa làm | — | — |
@@ -121,7 +121,7 @@ Sau merge: đánh dấu checkbox trong file này + cập nhật [`implementation
 |---|---|
 | **Branch** | `feature/mvvm-home-notifier` |
 | **Packages** | (đã có Riverpod) |
-| **Trạng thái** | Chưa làm |
+| **Trạng thái** | Đã xong (chờ merge) |
 
 ### Mục đích
 
@@ -143,11 +143,11 @@ MealRepository (Model / data access)
 
 ### Việc làm
 
-- [ ] `HomeMealsState`: categories, selectedCategory, meals, isLoading, error, query
-- [ ] `HomeMealsNotifier` (+ `homeMealsProvider`): bootstrap, loadCategory, search, openRandom
-- [ ] Notifier gọi `mealRepositoryProvider` + `searchHistoryStoreProvider.add` sau search OK
-- [ ] `HomeScreen`: chỉ TextField, Debouncer, chips UI, `ref.watch(homeMealsProvider)`
-- [ ] Unit test fake repository (loading → data / error)
+- [x] `HomeMealsState`: categories, selectedCategory, meals, isLoading, error, query
+- [x] `HomeMealsNotifier` (+ `homeMealsProvider`): bootstrap, loadCategory, search, openRandom
+- [x] Notifier gọi `mealRepositoryProvider` + `searchHistoryStoreProvider.add` sau search OK
+- [x] `HomeScreen`: chỉ TextField, Debouncer, chips UI, `ref.watch(homeMealsProvider)`
+- [x] Unit test fake repository (loading → data / error)
 
 ### Không làm trong P2
 
@@ -167,19 +167,19 @@ MealRepository (Model / data access)
 
 | Lớp | Việc | Xong |
 |---|---|---|
-| UI | Home UX giữ nguyên | [ ] |
-| Data | Vẫn qua MealRepository | [ ] |
-| Arch | View / ViewModel tách rõ | [ ] |
-| Lint | analyze sạch | [ ] |
-| Test | Notifier unit tests | [ ] |
-| Debug | Breakpoint trong notifier | [ ] |
-| Perf | Ít rebuild không cần thiết | [ ] |
-| Security | N/A | [ ] |
+| UI | Home UX giữ nguyên | [x] |
+| Data | Vẫn qua MealRepository | [x] |
+| Arch | View / ViewModel tách rõ | [x] |
+| Lint | analyze sạch | [x] |
+| Test | Notifier unit tests | [x] |
+| Debug | Breakpoint trong notifier | [x] |
+| Perf | Ít rebuild không cần thiết | [x] |
+| Security | N/A | [x] |
 
 ### Done khi
 
-- [ ] Home không gọi API/repo trực tiếp trong State (chỉ qua notifier)
-- [ ] `flutter test` pass
+- [x] Home không gọi API/repo trực tiếp trong State (chỉ qua notifier)
+- [x] `flutter test` pass
 
 ### Commit gợi ý
 
