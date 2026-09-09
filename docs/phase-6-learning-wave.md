@@ -27,9 +27,9 @@
 |---|---|---|---|---|
 | **P1** | `feature/app-icon` | Đã merge | — | Đã merge |
 | **P2** | `feature/mvvm-home-notifier` | Đã merge | — | Đã merge |
-| **P3** | `feature/local-db-cache` | Xong (chờ PR) | — | — |
-| **P4** | `feature/offline-middleware` | Xong (chờ PR; based on P3) | — | — |
-| **P5** | `feature/location-maps-cuisine` | Chưa làm | — | — |
+| **P3** | `feature/local-db-cache` | Đã merge | #7 | Đã merge |
+| **P4** | `feature/offline-middleware` | Đã merge | #8 | Đã merge |
+| **P5** | `feature/location-maps-cuisine` | Xong (chờ PR) | — | — |
 
 **Phụ thuộc**
 
@@ -334,7 +334,7 @@ Detect mất mạng → banner + đọc cache Drift; không crash.
 |---|---|
 | **Branch** | `feature/location-maps-cuisine` |
 | **Packages** | `geolocator`, `flutter_map`, `latlong2` |
-| **Trạng thái** | Chưa làm |
+| **Trạng thái** | Xong (chờ PR / merge) |
 
 ### Mục đích
 
@@ -342,12 +342,12 @@ Học **permission** + **map UI**; demo GPS → Area TheMealDB → list món. **
 
 ### Native config
 
-- [ ] iOS `Info.plist`: `NSLocationWhenInUseUsageDescription`
-- [ ] Android manifest: `ACCESS_COARSE_LOCATION`, `ACCESS_FINE_LOCATION`
+- [x] iOS `Info.plist`: `NSLocationWhenInUseUsageDescription`
+- [x] Android manifest: `ACCESS_COARSE_LOCATION`, `ACCESS_FINE_LOCATION`
 
 ### UX flow
 
-1. Nút **“Near me (demo)”** (Home AppBar hoặc Profile)
+1. Nút **“Near me (demo)”** (Home AppBar)
 2. Xin quyền — Deny → dialog + mở Settings
 3. Lấy lat/lng → `flutter_map` (OSM) + marker
 4. Lat/lng → Area bằng bảng hardcode (vd. VN → `Vietnamese`, default `Italian`)
@@ -356,11 +356,11 @@ Học **permission** + **map UI**; demo GPS → Area TheMealDB → list món. **
 
 ### Việc làm
 
-- [ ] `LocationService` (permission + position)
-- [ ] `latLngToCuisineArea(lat, lng)` + unit test
-- [ ] Screen/sheet: map + disclaimer + list (hoặc đẩy vào Home notifier)
-- [ ] `MealApi.byArea` / `MealRepository.byArea` nếu chưa có
-- [ ] Handle deny / service disabled
+- [x] `LocationService` (permission + position)
+- [x] `latLngToCuisineArea(lat, lng)` + unit test
+- [x] Screen: map + disclaimer + list (`NearMeScreen` + `NearMeNotifier`)
+- [x] `MealApi.byArea` / `MealRepository.byArea`
+- [x] Handle deny / service disabled
 
 ### Không làm
 
@@ -373,7 +373,8 @@ Học **permission** + **map UI**; demo GPS → Area TheMealDB → list món. **
 |---|---|
 | `lib/services/location_service.dart` | Permission + GPS |
 | `lib/utils/cuisine_area_mapper.dart` | Lat/lng → Area |
-| `lib/screens/near_me_screen.dart` (hoặc sheet) | Map + list |
+| `lib/screens/near_me_screen.dart` | Map + list |
+| `lib/providers/near_me_notifier.dart` | ViewModel |
 | `lib/services/meal_api.dart` + repository | `byArea` |
 | `ios/Runner/Info.plist` | Usage description |
 | `android/.../AndroidManifest.xml` | Permissions |
@@ -383,19 +384,19 @@ Học **permission** + **map UI**; demo GPS → Area TheMealDB → list món. **
 
 | Lớp | Việc | Xong |
 |---|---|---|
-| UI | Map + disclaimer + list / deny dialog | [ ] |
-| Data | GPS + byArea API | [ ] |
-| Arch | LocationService tách khỏi UI | [ ] |
-| Lint | analyze | [ ] |
-| Test | Mapper unit; permission mock nếu được | [ ] |
-| Debug | Log area sau map | [ ] |
-| Perf | Map tiles lazy | [ ] |
-| Security | Chỉ WhenInUse; không log PII thừa | [ ] |
+| UI | Map + disclaimer + list / deny dialog | [x] |
+| Data | GPS + byArea API | [x] |
+| Arch | LocationService tách khỏi UI | [x] |
+| Lint | analyze | [x] |
+| Test | Mapper + location + NearMe notifier | [x] |
+| Debug | Log area sau map | [x] |
+| Perf | Map tiles lazy (OSM TileLayer) | [x] |
+| Security | Chỉ WhenInUse; không log PII thừa | [x] |
 
 ### Done khi
 
-- [ ] Allow → map + list theo Area
-- [ ] Deny → không crash, có message
+- [x] Allow → map + list theo Area (manual)
+- [x] Deny → không crash, có message (unit + UI)
 
 ### Commit gợi ý
 

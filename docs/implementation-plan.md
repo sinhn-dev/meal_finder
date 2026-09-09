@@ -344,4 +344,4 @@ Home vẫn giữ local fetch state (`_bootstrap` / `_search`); gọi data qua `r
 10. Phase 6 Learning Wave — **làm tiếp** (xem [`phase-6-learning-wave.md`](./phase-6-learning-wave.md))
     - P1 App icon — **đã merge**
     - P2 MVVM Home — **đã xong** (branch `feature/mvvm-home-notifier`)
-    - P3 Drift cache → P4 Offline → P5 Location + Maps
+    - P3 Drift cache → P4 Offline → **P5 Location + Maps (xong, chờ PR)**

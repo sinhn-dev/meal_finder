@@ -44,6 +44,13 @@ class _FakeMealRepository implements MealRepository {
   }
 
   @override
+  Future<FetchResult<List<MealSummary>>> byArea(String area) async {
+    return FetchResult([
+      MealSummary(id: '3', name: '$area meal', thumbnail: ''),
+    ], isFromCache: fromCache);
+  }
+
+  @override
   Future<FetchResult<List<MealSummary>>> search(String query) async {
     searchCalls += 1;
     if (failSearch) {

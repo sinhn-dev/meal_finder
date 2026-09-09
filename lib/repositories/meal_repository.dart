@@ -13,6 +13,8 @@ abstract class MealRepository {
 
   Future<FetchResult<List<MealSummary>>> byCategory(String category);
 
+  Future<FetchResult<List<MealSummary>>> byArea(String area);
+
   Future<Meal?> lookup(String id);
 
   Future<Meal?> random();
@@ -93,6 +95,15 @@ class MealRepositoryImpl implements MealRepository {
       sourceKey: MealCacheKeys.category(category),
       label: 'byCategory="$category"',
       fetchRemote: () => _api.byCategory(category),
+    );
+  }
+
+  @override
+  Future<FetchResult<List<MealSummary>>> byArea(String area) {
+    return _mealsWithCache(
+      sourceKey: MealCacheKeys.area(area),
+      label: 'byArea="$area"',
+      fetchRemote: () => _api.byArea(area),
     );
   }
 
