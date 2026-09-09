@@ -212,6 +212,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
               ),
+            if (home.isFromCache && !home.isLoading && home.error == null)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Chip(
+                      avatar: const Icon(Icons.offline_bolt_outlined, size: 18),
+                      label: Text(
+                        home.isOffline
+                            ? 'Cached meals'
+                            : 'Showing cached results',
+                      ),
+                      visualDensity: VisualDensity.compact,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ),
+                ),
+              ),
             if (home.isLoading)
               const SliverFillRemaining(
                 child: Center(child: CircularProgressIndicator()),

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:meal_finder/models/fetch_result.dart';
 import 'package:meal_finder/models/meal.dart';
 import 'package:meal_finder/providers/app_providers.dart';
 import 'package:meal_finder/providers/home_meals_notifier.dart';
@@ -9,10 +10,15 @@ import 'package:meal_finder/repositories/meal_repository.dart';
 import 'package:meal_finder/services/search_history_store.dart';
 
 class _FakeMealRepository implements MealRepository {
-  _FakeMealRepository({this.failCategories = false, this.failSearch = false});
+  _FakeMealRepository({
+    this.failCategories = false,
+    this.failSearch = false,
+    this.fromCache = false,
+  });
 
   final bool failCategories;
   final bool failSearch;
+  final bool fromCache;
 
   int categoriesCalls = 0;
   int byCategoryCalls = 0;
@@ -20,28 +26,32 @@ class _FakeMealRepository implements MealRepository {
   String? lastCategory;
 
   @override
-  Future<List<String>> categories() async {
+  Future<FetchResult<List<String>>> categories() async {
     categoriesCalls += 1;
     if (failCategories) {
       throw Exception('categories failed');
     }
-    return const ['Beef', 'Chicken'];
+    return FetchResult(const ['Beef', 'Chicken'], isFromCache: fromCache);
   }
 
   @override
-  Future<List<MealSummary>> byCategory(String category) async {
+  Future<FetchResult<List<MealSummary>>> byCategory(String category) async {
     byCategoryCalls += 1;
     lastCategory = category;
-    return [MealSummary(id: '1', name: '$category meal', thumbnail: '')];
+    return FetchResult([
+      MealSummary(id: '1', name: '$category meal', thumbnail: ''),
+    ], isFromCache: fromCache);
   }
 
   @override
-  Future<List<MealSummary>> search(String query) async {
+  Future<FetchResult<List<MealSummary>>> search(String query) async {
     searchCalls += 1;
     if (failSearch) {
       throw Exception('search failed');
     }
-    return [MealSummary(id: '2', name: 'Searched $query', thumbnail: '')];
+    return FetchResult([
+      MealSummary(id: '2', name: 'Searched $query', thumbnail: ''),
+    ], isFromCache: fromCache);
   }
 
   @override
@@ -71,6 +81,7 @@ void main() {
       overrides: [
         mealRepositoryProvider.overrideWith((ref) => repository),
         searchHistoryStoreProvider.overrideWith((ref) => searchHistory),
+        isOnlineProvider.overrideWith((ref) => Stream.value(true)),
       ],
     );
   });
@@ -90,6 +101,7 @@ void main() {
     expect(state.categories, ['Beef', 'Chicken']);
     expect(state.selectedCategory, 'Beef');
     expect(state.meals.single.name, 'Beef meal');
+    expect(state.isFromCache, isFalse);
     expect(repository.categoriesCalls, 1);
     expect(repository.byCategoryCalls, 1);
   });
@@ -101,6 +113,7 @@ void main() {
       overrides: [
         mealRepositoryProvider.overrideWith((ref) => repository),
         searchHistoryStoreProvider.overrideWith((ref) => searchHistory),
+        isOnlineProvider.overrideWith((ref) => Stream.value(true)),
       ],
     );
 
@@ -156,6 +169,7 @@ void main() {
       overrides: [
         mealRepositoryProvider.overrideWith((ref) => repository),
         searchHistoryStoreProvider.overrideWith((ref) => searchHistory),
+        isOnlineProvider.overrideWith((ref) => Stream.value(true)),
       ],
     );
     final notifier = container.read(homeMealsProvider.notifier);
@@ -166,5 +180,24 @@ void main() {
     final state = container.read(homeMealsProvider);
     expect(state.error, contains('search failed'));
     expect(searchHistory.keywords, isEmpty);
+  });
+
+  test('bootstrap sets isFromCache when repository returns cache', () async {
+    repository = _FakeMealRepository(fromCache: true);
+    container.dispose();
+    container = ProviderContainer(
+      overrides: [
+        mealRepositoryProvider.overrideWith((ref) => repository),
+        searchHistoryStoreProvider.overrideWith((ref) => searchHistory),
+        isOnlineProvider.overrideWith((ref) => Stream.value(false)),
+      ],
+    );
+
+    await container.read(homeMealsProvider.notifier).bootstrap();
+
+    final state = container.read(homeMealsProvider);
+    expect(state.isFromCache, isTrue);
+    expect(state.isOffline, isTrue);
+    expect(state.meals, isNotEmpty);
   });
 }
