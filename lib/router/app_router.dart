@@ -7,6 +7,7 @@ import '../screens/favorites_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/meal_detail_screen.dart';
+import '../screens/near_me_screen.dart';
 import '../screens/profile_screen.dart';
 import '../services/auth_store.dart';
 import 'app_routes.dart';
@@ -64,6 +65,10 @@ GoRouter createAppRouter(AuthStore auth) {
             ],
           ),
         ],
+      ),
+      GoRoute(
+        path: AppRoutes.nearMe,
+        builder: (context, state) => const NearMeScreen(),
       ),
       GoRoute(
         path: '/meals/:id',

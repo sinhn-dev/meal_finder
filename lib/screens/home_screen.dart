@@ -109,6 +109,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         actions: [
           IconButton(
+            tooltip: 'Near me (demo)',
+            onPressed: () => context.push(AppRoutes.nearMe),
+            icon: const Icon(Icons.near_me_outlined),
+          ),
+          IconButton(
             tooltip: 'Random meal',
             onPressed: _openRandom,
             icon: const Icon(Icons.casino_outlined),

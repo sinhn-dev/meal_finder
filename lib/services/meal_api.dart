@@ -35,6 +35,11 @@ class MealApi {
     return _summaries(data);
   }
 
+  Future<List<MealSummary>> byArea(String area) async {
+    final data = await _get('filter.php', {'a': area});
+    return _summaries(data);
+  }
+
   Future<Meal?> lookup(String id) async {
     final data = await _get('lookup.php', {'i': id});
     final meals = data['meals'] as List<dynamic>?;

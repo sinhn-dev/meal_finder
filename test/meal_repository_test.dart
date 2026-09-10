@@ -48,6 +48,11 @@ class _FakeMealApi extends MealApi {
   }
 
   @override
+  Future<List<MealSummary>> byArea(String area) async {
+    return [MealSummary(id: '4', name: '$area meal', thumbnail: '')];
+  }
+
+  @override
   Future<Meal?> lookup(String id) async {
     lookupCalls += 1;
     return Meal(id: id, name: 'Meal $id', thumbnail: '', ingredients: const []);
@@ -191,5 +196,20 @@ void main() {
 
     expect(result.isFromCache, isTrue);
     expect(result.data, ['Seafood']);
+  });
+
+  test('byArea write-through uses area cache key', () async {
+    final database = AppDatabase(NativeDatabase.memory());
+    addTearDown(database.close);
+    final local = MealLocalDataSource(database);
+    final repo = MealRepositoryImpl(api, local: local);
+
+    final result = await repo.byArea('Vietnamese');
+    final cached = await repo.getCachedBySourceKey(
+      MealCacheKeys.area('Vietnamese'),
+    );
+
+    expect(result.data.single.name, 'Vietnamese meal');
+    expect(cached.single.name, 'Vietnamese meal');
   });
 }

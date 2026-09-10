@@ -8,6 +8,7 @@ import '../router/app_router.dart';
 import '../services/auth_store.dart';
 import '../services/connectivity_service.dart';
 import '../services/favorites_store.dart';
+import '../services/location_service.dart';
 import '../services/meal_api.dart';
 import '../services/search_history_store.dart';
 import '../services/theme_store.dart';
@@ -23,6 +24,10 @@ final mealLocalDataSourceProvider = Provider<MealLocalDataSource?>(
 
 final connectivityServiceProvider = Provider<ConnectivityService>((ref) {
   return ConnectivityService();
+});
+
+final locationServiceProvider = Provider<LocationService>((ref) {
+  return LocationService();
 });
 
 /// Current online status; starts with a one-shot check then listens to changes.
